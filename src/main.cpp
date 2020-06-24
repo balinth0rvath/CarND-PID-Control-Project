@@ -46,7 +46,7 @@ int main() {
 
 	double sum_error = 0.0;
 	double best_error = 0.0;
-	int counter = 1500;
+	int counter = 2500;
 	int param_idx = 0;
 
 	std::string state = "INC";
@@ -87,8 +87,8 @@ int main() {
 					
 					steer_value = error;
 
-					if (steer_value<-1.0) steer_value = -1.0;
-					if (steer_value>1.0) steer_value = 1.0;
+					if (steer_value<-0.8) steer_value = -0.8;
+					if (steer_value>0.8) steer_value = 0.8;
 					
          	double throttle = pid.GetThrottle(speed); 
 					counter--;
@@ -99,10 +99,10 @@ int main() {
 							best_error = sum_error;
 							std::cout << "best error was set first time to " << best_error << std::endl;	
 						}
-						counter = 1500;
+						counter = 2500;
 
-						std::cout << "------------------------------------" << std::endl;
-						std::cout << "A lap passed" << std::endl;
+						//std::cout << "------------------------------------" << std::endl;
+						//std::cout << "A lap passed" << std::endl;
 						std::cout << "------------------------------------" << std::endl;
 						std::cout << "Actual error: " << sum_error << std::endl;
 						std::cout << "param index: " << param_idx << std::endl;
@@ -112,40 +112,40 @@ int main() {
 							{
 								best_error = sum_error;
 								dp[param_idx] *= 1.1;
-								std::cout << "Incrementing succeeded, dp*1.1=" << dp[param_idx] << std::endl;
+								//std::cout << "Incrementing succeeded, dp*1.1=" << dp[param_idx] << std::endl;
 								state="INC";
 								// increment param
 								param_idx++;
 								if (param_idx>2) param_idx=0;
 							} else
 							{
-								std::cout << "Increment failed, p = " << p[param_idx] << std::endl;
+								//std::cout << "Increment failed, p = " << p[param_idx] << std::endl;
 								p[param_idx] -= 2 * dp[param_idx];
-								std::cout << "p = p - 2 * dp  = " << p[param_idx] << std::endl;
+								//std::cout << "p = p - 2 * dp  = " << p[param_idx] << std::endl;
 								state="DEC_CHECK";	
 							}
 						} else if (state=="DEC_CHECK")
 						{
 							state="INC";
-							std::cout << "decrementing fork next stage" << std::endl;
+							//std::cout << "decrementing fork next stage" << std::endl;
 							// increment param
 							if (sum_error < best_error)
 							{
 								best_error = sum_error;
 								dp[param_idx] *= 1.1;
-								std::cout << "second incrementing succeeded, dp*1.1=" << dp[param_idx] << std::endl;
+								//std::cout << "second incrementing succeeded, dp*1.1=" << dp[param_idx] << std::endl;
 							} else
 							{
 								p[param_idx] += dp[param_idx];
 								dp[param_idx] *= 0.9;
-								std::cout << "second incrementing failed, dp*0.9=" << dp[param_idx] << std::endl;
+								//std::cout << "second incrementing failed, dp*0.9=" << dp[param_idx] << std::endl;
 							}
 							param_idx++;
 							if (param_idx>2) param_idx=0;
 						}
 						if (state=="INC")
 						{
-							std::cout << "increment p=" << p[param_idx] << " with dp=" << dp[param_idx] << std::endl;
+							//std::cout << "increment p=" << p[param_idx] << " with dp=" << dp[param_idx] << std::endl;
 							p[param_idx] += dp[param_idx];							
 							state="INC_CHECK";
 						}

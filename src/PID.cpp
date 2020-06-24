@@ -40,5 +40,5 @@ double PID::TotalError() {
 }
 
 double PID::GetThrottle(double speed) {
-	return (speed<15.0) ? 0.3 : 0.0;	
+	return (speed<18.0) ? 0.3 : 0.0;	
 }

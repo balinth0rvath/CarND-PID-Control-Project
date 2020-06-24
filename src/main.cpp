@@ -35,16 +35,16 @@ int main() {
 
   PID pid;
 
-	std::vector<double> p = {0.5,0.01,2.0};
-	std::vector<double> dp = {0.03,0.005,1.0};
-	pid.Init(0.5,0.01,2.0);
+	std::vector<double> p = {0.5,0.008,1.0};
+	std::vector<double> dp = {0.3,0.004,0.3};
+	pid.Init(p[0],p[1],p[2]);
 
-	std::cout << "First try: " << p[0] << " 0.01 2.0" << std::endl; 
-	std::cout << "       dp: " << dp[0] << " 0.005 1.0" << std::endl; 
+	std::cout << "First try: " << p[0] << " " <<  p[1] << " " << p[2] << std::endl; 
+	std::cout << "       dp: " << dp[0] << " " << dp[1] << " " << dp[2] << std::endl; 
 
 	double sum_error = 0.0;
 	double best_error = 0.0;
-	int counter = 1800;
+	int counter = 900;
 	int param_idx = 0;
 	std::string state = "INC";
   /**
@@ -84,13 +84,13 @@ int main() {
 					steer_value = error;
          	double throttle = pid.GetThrottle(speed); 
 					counter--;
-					
+					int i=0;	
 					if (!counter)
 					{
 						if (!best_error)
 						{
 							best_error = sum_error;
-							std::cout << "best error set first time to " << best_error << std::endl;	
+							std::cout << "best error was set first time to " << best_error << std::endl;	
 						}
 						counter = 1800;
 
@@ -98,25 +98,23 @@ int main() {
 						std::cout << "A lap passed" << std::endl;
 						std::cout << "------------------------------------" << std::endl;
 						std::cout << "Actual error: " << sum_error << std::endl;
-						if (state=="INC")
-						{
-							std::cout << "increment p=" << p[0] << " with dp=" << dp[0] << std::endl;
-							p[0] += dp[0];							
-							state="INC_CHECK";
-						} else if (state=="INC_CHECK")
+
+						if (state=="INC_CHECK")
 						{
 							if (sum_error < best_error)
 							{
 								best_error = sum_error;
-								dp[0] *= 1.1;
-								std::cout << "Incrementing succeeded, dp*1.1=" << dp[0] << std::endl;
+								dp[i] *= 1.1;
+								std::cout << "Incrementing succeeded, dp*1.1=" << dp[i] << std::endl;
 								state="INC";
 								// increment param
+								i++;
+								if (i>2) i=0;
 							} else
 							{
-								std::cout << "Increment failed, p = " << p[0] << std::endl;
-								p[0] -= 2 * dp[0];
-								std::cout << "p = p - 2 * dp  = " << p[0] << std::endl;
+								std::cout << "Increment failed, p = " << p[i] << std::endl;
+								p[i] -= 2 * dp[i];
+								std::cout << "p = p - 2 * dp  = " << p[i] << std::endl;
 								state="DEC_CHECK";	
 							}
 						} else if (state=="DEC_CHECK")
@@ -127,20 +125,27 @@ int main() {
 							if (sum_error < best_error)
 							{
 								best_error = sum_error;
-								dp[0] *= 1.1;
-								std::cout << "second incrementing succeeded, dp*1.1=" << dp[0] << std::endl;
+								dp[i] *= 1.1;
+								std::cout << "second incrementing succeeded, dp*1.1=" << dp[i] << std::endl;
 							} else
 							{
-								p[0] += dp[0];
-								dp[0] *= 0.9;
-								std::cout << "second incrementing failed, dp*0.9=" << dp[0] << std::endl;
+								p[i] += dp[i];
+								dp[i] *= 0.9;
+								std::cout << "second incrementing failed, dp*0.9=" << dp[i] << std::endl;
 							}
+							if (i>2) i=0;
 						}
-				
+						if (state=="INC")
+						{
+							std::cout << "increment p=" << p[i] << " with dp=" << dp[i] << std::endl;
+							p[i] += dp[i];							
+							state="INC_CHECK";
+						}
+	
 						sum_error = 0.0;
-						std::cout << "Now trying: " << p[0] << " 0.01 2.0" << std::endl; 
-						std::cout << "        dp: " << dp[0] << " 0.005 1.0" << std::endl; 
-						pid.Init(p[0],0.01,2.0);
+						std::cout << "Now trying: " << p[0] << " " << p[1] << " " << p[2]  << std::endl; 
+						std::cout << "        dp: " << dp[0] << " " << dp[1] << " " << dp[2] << std::endl; 
+						pid.Init(p[0],p[1],p[2]);
 						//param_idx++;
 
 					}

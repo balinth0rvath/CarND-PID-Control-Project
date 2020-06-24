@@ -36,12 +36,9 @@ double PID::TotalError() {
   /**
    * TODO: Calculate and return the total error
    */
-  return 0.0;  // TODO: Add your total error calc here!
+	return -Kp * p_error - Kd * d_error - Ki * i_error;
 }
 
-double PID::CalculateSteering()
-{
-	double steering;
-	//steering = -Kp * p_error - Kd * d_error - Ki * i_error;
-	steering = -Kp * p_error; 
+double PID::GetThrottle(double speed) {
+	return (speed<15.0) ? 0.3 : 0.0;	
 }

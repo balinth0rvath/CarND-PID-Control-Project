@@ -34,13 +34,24 @@ int main() {
   uWS::Hub h;
 
   PID pid;
-	pid.Init(0.1,1.1,0.004);
 
+	std::vector<double> p = {0.5,0.01,2.0};
+	std::vector<double> dp = {0.03,0.005,1.0};
+	pid.Init(0.5,0.01,2.0);
+
+	std::cout << "First try: " << p[0] << " 0.01 2.0" << std::endl; 
+	std::cout << "       dp: " << dp[0] << " 0.005 1.0" << std::endl; 
+
+	double sum_error = 0.0;
+	double best_error = 0.0;
+	int counter = 1800;
+	int param_idx = 0;
+	std::string state = "INC";
   /**
    * TODO: Initialize the pid variable.
    */
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  h.onMessage([&pid,&sum_error,&best_error,&counter,&param_idx,&p,&dp, &state](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -59,6 +70,7 @@ int main() {
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
           double steer_value;
+
           /**
            * TODO: Calculate steering value here, remember the steering value is
            *   [-1, 1].
@@ -67,17 +79,80 @@ int main() {
            */
 
 					pid.UpdateError(cte);
-					steer_value = pid.CalculateSteering();
-          
+					double error = pid.TotalError();
+					sum_error += pow(error,2.0);
+					steer_value = error;
+         	double throttle = pid.GetThrottle(speed); 
+					counter--;
+					
+					if (!counter)
+					{
+						if (!best_error)
+						{
+							best_error = sum_error;
+							std::cout << "best error set first time to " << best_error << std::endl;	
+						}
+						counter = 1800;
+
+						std::cout << "------------------------------------" << std::endl;
+						std::cout << "A lap passed" << std::endl;
+						std::cout << "------------------------------------" << std::endl;
+						std::cout << "Actual error: " << sum_error << std::endl;
+						if (state=="INC")
+						{
+							std::cout << "increment p=" << p[0] << " with dp=" << dp[0] << std::endl;
+							p[0] += dp[0];							
+							state="INC_CHECK";
+						} else if (state=="INC_CHECK")
+						{
+							if (sum_error < best_error)
+							{
+								best_error = sum_error;
+								dp[0] *= 1.1;
+								std::cout << "Incrementing succeeded, dp*1.1=" << dp[0] << std::endl;
+								state="INC";
+								// increment param
+							} else
+							{
+								std::cout << "Increment failed, p = " << p[0] << std::endl;
+								p[0] -= 2 * dp[0];
+								std::cout << "p = p - 2 * dp  = " << p[0] << std::endl;
+								state="DEC_CHECK";	
+							}
+						} else if (state=="DEC_CHECK")
+						{
+							state="INC";
+							std::cout << "decrementing fork next stage" << std::endl;
+							// increment param
+							if (sum_error < best_error)
+							{
+								best_error = sum_error;
+								dp[0] *= 1.1;
+								std::cout << "second incrementing succeeded, dp*1.1=" << dp[0] << std::endl;
+							} else
+							{
+								p[0] += dp[0];
+								dp[0] *= 0.9;
+								std::cout << "second incrementing failed, dp*0.9=" << dp[0] << std::endl;
+							}
+						}
+				
+						sum_error = 0.0;
+						std::cout << "Now trying: " << p[0] << " 0.01 2.0" << std::endl; 
+						std::cout << "        dp: " << dp[0] << " 0.005 1.0" << std::endl; 
+						pid.Init(p[0],0.01,2.0);
+						//param_idx++;
+
+					}
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
-                    << std::endl;
+          //std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
+           //         << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {

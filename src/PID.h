@@ -24,12 +24,13 @@ class PID {
    * @param cte The current cross track error
    */
   void UpdateError(double cte);
-	double CalculateSteering();
   /**
    * Calculate the total PID error.
    * @output The total PID error
    */
   double TotalError();
+
+	double GetThrottle(double speed);
 
  private:
   /**

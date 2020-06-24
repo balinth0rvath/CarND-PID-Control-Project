@@ -44,7 +44,7 @@ int main() {
 
 	double sum_error = 0.0;
 	double best_error = 0.0;
-	int counter = 900;
+	int counter = 500;
 	int param_idx = 0;
 	std::string state = "INC";
   /**
@@ -81,7 +81,12 @@ int main() {
 					pid.UpdateError(cte);
 					double error = pid.TotalError();
 					sum_error += pow(error,2.0);
+					
 					steer_value = error;
+
+					if (steer_value<-1.0) steer_value = -1.0;
+					if (steer_value>1.0) steer_value = 1.0;
+					
          	double throttle = pid.GetThrottle(speed); 
 					counter--;
 					int i=0;	
@@ -92,7 +97,7 @@ int main() {
 							best_error = sum_error;
 							std::cout << "best error was set first time to " << best_error << std::endl;	
 						}
-						counter = 1800;
+						counter = 500;
 
 						std::cout << "------------------------------------" << std::endl;
 						std::cout << "A lap passed" << std::endl;
@@ -151,7 +156,7 @@ int main() {
 					}
           // DEBUG
           //std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
-           //         << std::endl;
+          //          << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;

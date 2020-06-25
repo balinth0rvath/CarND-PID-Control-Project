@@ -7,7 +7,7 @@
 
 _P_ is the proportional value. If it is too small the vehicle cannot drive a smooth path in curves because it cannot keep the center line well. If it is too large the vehicle starts to oscillate. \
 _I_ is the integral value. Its value keeps growing when the car is constanly on a particular side of center line, for example there can be a bias towards to left or right. I found it useful correcting sharp curves. \
-_D_ is the differential value. It prevents overshooting by keeping a force against the proportional effect. The car started wobbling if it wasn`t tuned well. \
+_D_ is the differential value. It prevents overshooting by keeping a force against the proportional effect. The car started wobbling if it wasn`t tuned well. 
 
 #### 2. Describe how the final hyperparameters were chosen.
 I have implemented twiddle using a state machine. It is in the main for simplicity. The error was calculated after every full lap. The error is the sum of square of total error. Total error is -Kp * p_error -Kd * d_error - Ki * i_error after each relevant websocket message.

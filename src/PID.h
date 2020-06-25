@@ -1,6 +1,13 @@
 #ifndef PID_H
 #define PID_H
 
+enum class TwiddleState {
+	INC,
+	INC_CHECK,
+	DEC_CHECK	
+};
+
+
 class PID {
  public:
   /**

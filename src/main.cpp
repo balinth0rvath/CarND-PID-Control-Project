@@ -35,8 +35,8 @@ int main() {
 
   PID pid;
 
-	std::vector<double> p = {0.4,0.008,1.0};
-	std::vector<double> dp = {0.1,0.002,0.2};
+	std::vector<double> p = {0.5,0.006,3.0};
+	std::vector<double> dp = {0.1,0.001,0.5};
 	pid.Init(p[0],p[1],p[2]);
 
 	std::cout << std::endl;
@@ -46,10 +46,10 @@ int main() {
 
 	double sum_error = 0.0;
 	double best_error = 0.0;
-	int counter = 2500;
+	int counter = 1700;
 	int param_idx = 0;
 
-	std::string state = "INC";
+	TwiddleState state = TwiddleState::INC;
   /**
    * TODO: Initialize the pid variable.
    */
@@ -87,8 +87,8 @@ int main() {
 					
 					steer_value = error;
 
-					if (steer_value<-0.8) steer_value = -0.8;
-					if (steer_value>0.8) steer_value = 0.8;
+					if (steer_value<-0.7) steer_value = -0.7;
+					if (steer_value>0.7) steer_value = 0.7;
 					
          	double throttle = pid.GetThrottle(speed); 
 					counter--;
@@ -99,21 +99,21 @@ int main() {
 							best_error = sum_error;
 							std::cout << "best error was set first time to " << best_error << std::endl;	
 						}
-						counter = 2500;
+						counter = 1700;
 
 						//std::cout << "------------------------------------" << std::endl;
 						//std::cout << "A lap passed" << std::endl;
 						std::cout << "------------------------------------" << std::endl;
 						std::cout << "Actual error: " << sum_error << std::endl;
 						std::cout << "param index: " << param_idx << std::endl;
-						if (state=="INC_CHECK")
+						if (state == TwiddleState::INC_CHECK)
 						{
 							if (sum_error < best_error)
 							{
 								best_error = sum_error;
 								dp[param_idx] *= 1.1;
 								//std::cout << "Incrementing succeeded, dp*1.1=" << dp[param_idx] << std::endl;
-								state="INC";
+								state=TwiddleState::INC;
 								// increment param
 								param_idx++;
 								if (param_idx>2) param_idx=0;
@@ -122,11 +122,11 @@ int main() {
 								//std::cout << "Increment failed, p = " << p[param_idx] << std::endl;
 								p[param_idx] -= 2 * dp[param_idx];
 								//std::cout << "p = p - 2 * dp  = " << p[param_idx] << std::endl;
-								state="DEC_CHECK";	
+								state=TwiddleState::DEC_CHECK;	
 							}
-						} else if (state=="DEC_CHECK")
+						} else if (state==TwiddleState::DEC_CHECK)
 						{
-							state="INC";
+							state=TwiddleState::INC;
 							//std::cout << "decrementing fork next stage" << std::endl;
 							// increment param
 							if (sum_error < best_error)
@@ -143,11 +143,11 @@ int main() {
 							param_idx++;
 							if (param_idx>2) param_idx=0;
 						}
-						if (state=="INC")
+						if (state==TwiddleState::INC)
 						{
 							//std::cout << "increment p=" << p[param_idx] << " with dp=" << dp[param_idx] << std::endl;
 							p[param_idx] += dp[param_idx];							
-							state="INC_CHECK";
+							state=TwiddleState::INC_CHECK;
 						}
 	
 						sum_error = 0.0;

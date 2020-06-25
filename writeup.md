@@ -36,7 +36,7 @@ Starting paramteres:
 P = 0.5 I =0.006 D =3
 DP= 0.1 DI=0.001 DD=0.5
 </pre>
-[Second measurements of 35 laps](https://github.com/balinth0rvath/CarND-PID-Control-Project/blob/master/measurements_1.txt)
+[Second measurements of 35 laps](https://github.com/balinth0rvath/CarND-PID-Control-Project/blob/master/measurements_2.txt)
 
 Best parameters:
 P=0.44 I=0.00531 D=2.43297 error=20.3168

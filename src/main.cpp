@@ -37,7 +37,7 @@ int main() {
 
 	int lap_counter = 1;
 	// Good P I D params from the previous measurements
-	std::vector<double> p = {0.4,0.0059,2.7};
+	std::vector<double> p = {0.44,0.00531,2.43297};
 	std::vector<double> dp = {0.04,0.00059,0.27};
 	pid.Init(p[0],p[1],p[2]);
 
